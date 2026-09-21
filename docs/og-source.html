@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1200px; height: 630px; background: #12233f; color: #fff; font-family: "Noto Serif KR", "Noto Sans KR", "Noto Sans CJK KR", sans-serif; position: relative; overflow: hidden; }
+  .brand { position: absolute; left: 72px; top: 60px; display: flex; align-items: center; gap: 14px; font-size: 30px; font-weight: 700; }
+  .brand svg { width: 44px; height: 44px; }
+  h1 { position: absolute; left: 72px; top: 200px; font-size: 62px; line-height: 1.38; font-weight: 700; letter-spacing: -0.01em; }
+  .tag { position: absolute; left: 72px; bottom: 60px; font-family: "Noto Sans KR", "Noto Sans CJK KR", sans-serif; font-size: 24px; color: rgba(255,255,255,.7); }
+  .doc { position: absolute; right: 84px; top: 88px; width: 360px; height: 454px; background: #fff; padding: 10px; transform: rotate(-3deg); box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); color: #12233f; }
+  .doc .in { height: 100%; border: 1.5px solid rgba(184,134,43,.7); padding: 28px 26px; position: relative; }
+  .doc .top { display: flex; align-items: center; gap: 8px; color: #1d4f91; font-weight: 700; font-size: 18px; }
+  .doc .top svg { width: 26px; height: 26px; }
+  .doc h2 { margin-top: 34px; text-align: center; font-size: 30px; letter-spacing: .12em; }
+  .doc .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #d5dbe3; font-family: "Noto Sans KR", "Noto Sans CJK KR", sans-serif; font-size: 16px; }
+  .doc .rows { margin-top: 30px; border-top: 1px solid #d5dbe3; }
+  .doc .row span:first-child { color: #5b6778; font-size: 14px; }
+  .seal { position: absolute; right: 22px; bottom: 22px; width: 92px; height: 92px; color: #b8862b; opacity: .92; }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="7" r="3"/><path d="M16 10v17"/><path d="M10.5 15h11"/><path d="M5.5 19.5c.6 4.4 4.6 7.5 10.5 7.5s9.9-3.1 10.5-7.5"/></svg>
+    앵커보증
+  </div>
+  <h1>사업의 신뢰를<br />보증서 한 장으로<br />증명하세요</h1>
+  <p class="tag">포트폴리오 컨셉 프로젝트 · 실제 기관과 무관한 가상 브랜드</p>
+  <div class="doc"><div class="in">
+    <div class="top"><svg viewBox="0 0 32 32" fill="none" stroke="#1d4f91" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="7" r="3"/><path d="M16 10v17"/><path d="M10.5 15h11"/><path d="M5.5 19.5c.6 4.4 4.6 7.5 10.5 7.5s9.9-3.1 10.5-7.5"/></svg>앵커보증</div>
+    <h2>계약이행보증서</h2>
+    <div class="rows">
+      <div class="row"><span>보증번호</span><span>2026-0421-0087</span></div>
+      <div class="row"><span>피보증인</span><span>예시상사 주식회사</span></div>
+      <div class="row"><span>보증금액</span><span>금 120,000,000원</span></div>
+    </div>
+    <svg class="seal" viewBox="0 0 88 88"><g transform="rotate(-12 44 44)" fill="none" stroke="currentColor"><circle cx="44" cy="44" r="40" stroke-width="3"/><circle cx="44" cy="44" r="34" stroke-width="1"/><text x="44" y="42" text-anchor="middle" font-size="19" font-weight="700" fill="currentColor" stroke="none">앵커</text><text x="44" y="62" text-anchor="middle" font-size="19" font-weight="700" fill="currentColor" stroke="none">보증</text></g></svg>
+  </div></div>
+</body>
+</html>

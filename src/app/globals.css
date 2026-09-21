@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #12233f;
+  --harbor: #1d4f91;
+  --mist: #e8ecf1;
+  --chalk: #f6f7f9;
+  --brass: #b8862b;
+  --muted: #5b6778;
+  --line: #d5dbe3;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-harbor: var(--harbor);
+  --color-mist: var(--mist);
+  --color-chalk: var(--chalk);
+  --color-brass: var(--brass);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-sans: var(--font-sans-kr), system-ui, sans-serif;
+  --font-serif: var(--font-serif-kr), "Noto Serif KR", serif;
+}
+
+html {
+  scroll-padding-top: 80px;
+}
+
+body {
+  background: var(--chalk);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  word-break: keep-all;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--harbor);
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+  55% {
+    opacity: 0.95;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+.seal-stamp {
+  opacity: 0;
+  animation: stamp 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) 0.6s both;
+}
