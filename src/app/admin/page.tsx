@@ -36,20 +36,25 @@ function PaymentEditor({
     setSaving(true);
     setError(null);
     setSaved(false);
-    const res = await fetch(`/api/admin/applications/${app.id}/payment`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ premiumAmount: premium || null, paymentAccount: account || null }),
-    });
-    const json = (await res.json()) as { application?: Application; error?: string };
-    if (!res.ok || !json.application) {
-      setError(json.error ?? "저장 중 오류가 발생했습니다.");
-    } else {
-      onSaved(json.application);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
+    try {
+      const res = await fetch(`/api/admin/applications/${app.id}/payment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ premiumAmount: premium || null, paymentAccount: account || null }),
+      });
+      const json = (await res.json()) as { application?: Application; error?: string };
+      if (!res.ok || !json.application) {
+        setError(json.error ?? "저장 중 오류가 발생했습니다.");
+      } else {
+        onSaved(json.application);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1500);
+      }
+    } catch {
+      setError("서버에 연결할 수 없습니다.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
@@ -93,20 +98,32 @@ export default function AdminPage() {
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const loadList = async () => {
-    const res = await fetch("/api/admin/applications");
-    if (res.status === 401) {
-      setState("needs-login");
-      return;
-    }
-    const json = (await res.json()) as { applications?: Application[]; error?: string };
-    if (!res.ok) {
-      setListError(json.error ?? "목록을 불러오지 못했습니다.");
+    try {
+      const res = await fetch("/api/admin/applications");
+      if (res.status === 401) {
+        setState("needs-login");
+        return;
+      }
+      let json: { applications?: Application[]; error?: string };
+      try {
+        json = (await res.json()) as { applications?: Application[]; error?: string };
+      } catch {
+        setListError(`서버 응답을 해석할 수 없습니다. (status ${res.status})`);
+        setState("ready");
+        return;
+      }
+      if (!res.ok) {
+        setListError(json.error ?? "목록을 불러오지 못했습니다.");
+        setState("ready");
+        return;
+      }
+      setApps(json.applications ?? []);
+      setListError(null);
       setState("ready");
-      return;
+    } catch {
+      setListError("서버에 연결할 수 없습니다. 잠시 후 새로고침해 주세요.");
+      setState("ready");
     }
-    setApps(json.applications ?? []);
-    setListError(null);
-    setState("ready");
   };
 
   useEffect(() => {
@@ -117,19 +134,23 @@ export default function AdminPage() {
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    const json = (await res.json()) as { error?: string };
-    if (!res.ok) {
-      setLoginError(json.error ?? "로그인에 실패했습니다.");
-      return;
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const json = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setLoginError(json.error ?? "로그인에 실패했습니다.");
+        return;
+      }
+      setPassword("");
+      setState("checking");
+      loadList();
+    } catch {
+      setLoginError("서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
     }
-    setPassword("");
-    setState("checking");
-    loadList();
   };
 
   const onLogout = async () => {
@@ -140,15 +161,18 @@ export default function AdminPage() {
 
   const onStatusChange = async (id: string, status: ApplicationStatus) => {
     setSavingId(id);
-    const res = await fetch(`/api/admin/applications/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      setApps((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+    try {
+      const res = await fetch(`/api/admin/applications/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setApps((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+      }
+    } finally {
+      setSavingId(null);
     }
-    setSavingId(null);
   };
 
   const onCertificateSelected = async (id: string, e: ChangeEvent<HTMLInputElement>) => {
@@ -184,14 +208,19 @@ export default function AdminPage() {
   const onCertificateRemove = async (id: string) => {
     setCertBusyId(id);
     setCertError(null);
-    const res = await fetch(`/api/admin/applications/${id}/certificate`, { method: "DELETE" });
-    if (res.ok) {
-      setApps((prev) => prev.map((a) => (a.id === id ? { ...a, certificate_data: null } : a)));
-    } else {
-      const json = (await res.json()) as { error?: string };
-      setCertError({ id, message: json.error ?? "삭제 중 오류가 발생했습니다." });
+    try {
+      const res = await fetch(`/api/admin/applications/${id}/certificate`, { method: "DELETE" });
+      if (res.ok) {
+        setApps((prev) => prev.map((a) => (a.id === id ? { ...a, certificate_data: null } : a)));
+      } else {
+        const json = (await res.json()) as { error?: string };
+        setCertError({ id, message: json.error ?? "삭제 중 오류가 발생했습니다." });
+      }
+    } catch {
+      setCertError({ id, message: "서버에 연결할 수 없습니다." });
+    } finally {
+      setCertBusyId(null);
     }
-    setCertBusyId(null);
   };
 
   if (state === "checking") {
