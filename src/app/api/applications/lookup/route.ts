@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   if (number) {
     const { data, error } = await supabase
       .from("applications")
-      .select("guarantee_number,type,amount,period,status,certificate_data,created_at")
+      .select("guarantee_number,type,amount,period,status,certificate_data,premium_amount,payment_account,created_at")
       .eq("guarantee_number", number)
       .maybeSingle();
 
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   if (name && phone) {
     const { data, error } = await supabase
       .from("applications")
-      .select("guarantee_number,type,amount,period,status,certificate_data,created_at")
+      .select("guarantee_number,type,amount,period,status,certificate_data,premium_amount,payment_account,created_at")
       .eq("name", name)
       .eq("phone", phone)
       .order("created_at", { ascending: false });

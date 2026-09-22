@@ -11,6 +11,8 @@ create table if not exists applications (
   period text not null,
   status text not null default '접수 완료',
   certificate_data text,
+  premium_amount bigint,
+  payment_account text,
   created_at timestamptz not null default now()
 );
 
@@ -24,3 +26,7 @@ alter table applications enable row level security;
 -- 이미 테이블을 만드셨다면 위 create table은 무시되고, 아래 한 줄만 실행하면
 -- 기존 테이블에 보증서 이미지 컬럼이 추가됩니다.
 alter table applications add column if not exists certificate_data text;
+
+-- 보험료 납입 안내(보험료, 입금 계좌)를 위한 컬럼입니다. 기존 테이블에는 이 두 줄을 실행하세요.
+alter table applications add column if not exists premium_amount bigint;
+alter table applications add column if not exists payment_account text;

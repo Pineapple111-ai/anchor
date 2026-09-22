@@ -2,6 +2,7 @@ export const STATUS_VALUES = [
   "접수 완료",
   "서류 심사 중",
   "심사 완료",
+  "보험료 입금 대기",
   "보증서 발급 완료",
 ] as const;
 
@@ -21,12 +22,22 @@ export type Application = {
   period: string;
   status: ApplicationStatus;
   certificate_data: string | null;
+  premium_amount: number | null;
+  payment_account: string | null;
   created_at: string;
 };
 
 export type ApplicationSummary = Pick<
   Application,
-  "guarantee_number" | "type" | "amount" | "period" | "status" | "certificate_data" | "created_at"
+  | "guarantee_number"
+  | "type"
+  | "amount"
+  | "period"
+  | "status"
+  | "certificate_data"
+  | "premium_amount"
+  | "payment_account"
+  | "created_at"
 >;
 
 export function toSummary(app: Application): ApplicationSummary {
@@ -37,6 +48,8 @@ export function toSummary(app: Application): ApplicationSummary {
     period: app.period,
     status: app.status,
     certificate_data: app.certificate_data,
+    premium_amount: app.premium_amount,
+    payment_account: app.payment_account,
     created_at: app.created_at,
   };
 }

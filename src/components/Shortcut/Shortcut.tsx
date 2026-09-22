@@ -11,7 +11,7 @@ const items: Item[] = [
   { icon: "status", title: "진행 현황 조회", desc: "접수한 보증의 심사 단계를 확인합니다.", action: "status" },
   { icon: "docs", title: "필요 서류 안내", desc: "보증 유형별로 준비할 서류를 안내합니다.", action: "documents" },
   { icon: "book", title: "상담 예약", desc: "방문 또는 전화 상담 시간을 예약합니다.", action: "consult" },
-  { icon: "branch", title: "지점 찾기", desc: "가까운 지점의 위치와 운영 시간을 봅니다.", href: "#" },
+  { icon: "payment", title: "보험료 납입", desc: "진행 상황과 납부할 보험료, 입금 계좌를 확인합니다.", action: "payment" },
 ];
 
 export default function Shortcut() {

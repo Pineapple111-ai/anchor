@@ -19,6 +19,68 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+function PaymentEditor({
+  app,
+  onSaved,
+}: {
+  app: Application;
+  onSaved: (updated: Application) => void;
+}) {
+  const [premium, setPremium] = useState(app.premium_amount != null ? String(app.premium_amount) : "");
+  const [account, setAccount] = useState(app.payment_account ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const onSave = async () => {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    const res = await fetch(`/api/admin/applications/${app.id}/payment`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ premiumAmount: premium || null, paymentAccount: account || null }),
+    });
+    const json = (await res.json()) as { application?: Application; error?: string };
+    if (!res.ok || !json.application) {
+      setError(json.error ?? "저장 중 오류가 발생했습니다.");
+    } else {
+      onSaved(json.application);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1500);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="flex min-w-[220px] flex-col gap-1.5">
+      <input
+        type="number"
+        min={0}
+        value={premium}
+        onChange={(e) => setPremium(e.target.value)}
+        placeholder="보험료(원)"
+        className="rounded-md border border-line px-2 py-1.5 text-[13px] outline-none focus:border-harbor"
+      />
+      <input
+        value={account}
+        onChange={(e) => setAccount(e.target.value)}
+        placeholder="입금 계좌 (예: 국민 123-456-7890)"
+        className="rounded-md border border-line px-2 py-1.5 text-[13px] outline-none focus:border-harbor"
+      />
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={saving}
+        className="self-start rounded-md border border-line px-2.5 py-1 text-[12px] hover:border-harbor disabled:opacity-60"
+      >
+        {saving ? "저장 중…" : saved ? "저장됨" : "저장"}
+      </button>
+      {error && <p className="text-[12px] text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [state, setState] = useState<LoadState>("checking");
   const [password, setPassword] = useState("");
@@ -187,7 +249,7 @@ export default function AdminPage() {
         )}
 
         <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-white">
-          <table className="w-full min-w-[980px] text-left text-[14px]">
+          <table className="w-full min-w-[1220px] text-left text-[14px]">
             <thead className="border-b border-line bg-chalk text-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">접수일</th>
@@ -199,12 +261,13 @@ export default function AdminPage() {
                 <th className="px-4 py-3 font-medium">기간</th>
                 <th className="px-4 py-3 font-medium">상태</th>
                 <th className="px-4 py-3 font-medium">보증서 이미지</th>
+                <th className="px-4 py-3 font-medium">보험료 / 계좌</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {apps.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
                     접수된 신청이 없습니다.
                   </td>
                 </tr>
@@ -278,6 +341,14 @@ export default function AdminPage() {
                     {certError?.id === a.id && (
                       <p className="mt-1 text-[12px] text-red-600">{certError.message}</p>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <PaymentEditor
+                      app={a}
+                      onSaved={(updated) =>
+                        setApps((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+                      }
+                    />
                   </td>
                 </tr>
               ))}

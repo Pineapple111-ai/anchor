@@ -6,6 +6,7 @@ import StatusModal from "./StatusModal";
 import ConsultModal from "./ConsultModal";
 import EligibilityModal from "./EligibilityModal";
 import DocumentsModal from "./DocumentsModal";
+import PaymentModal from "./PaymentModal";
 
 export default function ModalRoot() {
   const { active, close } = useModal();
@@ -21,6 +22,8 @@ export default function ModalRoot() {
       return <EligibilityModal onClose={close} />;
     case "documents":
       return <DocumentsModal onClose={close} />;
+    case "payment":
+      return <PaymentModal onClose={close} />;
     default:
       return null;
   }

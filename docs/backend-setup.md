@@ -22,6 +22,13 @@
 alter table applications add column if not exists certificate_data text;
 ```
 
+보험료 납입 안내 기능을 이번에 처음 받으셨다면, 아래 두 줄도 함께 실행하세요.
+
+```sql
+alter table applications add column if not exists premium_amount bigint;
+alter table applications add column if not exists payment_account text;
+```
+
 ## 3. API 키 확인하기
 
 1. 왼쪽 메뉴에서 **Project Settings → API**를 엽니다.
@@ -61,6 +68,8 @@ service_role 키는 데이터베이스 전체에 접근할 수 있는 강력한 
 4. "진행 현황 조회"에서 방금 받은 보증번호, 또는 이름·연락처로 조회가 되는지 확인합니다.
 5. 관리자 페이지에서 해당 신청에 이미지를 업로드하고 상태를 "보증서 발급 완료"로 바꾼 뒤,
    "진행 현황 조회"에서 다운로드 버튼이 나오는지 확인합니다.
+6. 관리자 페이지에서 같은 신청에 보험료와 입금 계좌를 입력하고 저장한 뒤, "보험료 납입"에서
+   같은 보증번호로 조회했을 때 두 값이 보이는지 확인합니다.
 
 ## 참고
 
