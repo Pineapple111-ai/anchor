@@ -2,10 +2,17 @@
 
 import { useState, type FormEvent } from "react";
 import Modal from "./Modal";
-import { generateGuaranteeNumber } from "@/lib/mock";
+import { formatDigitsWithCommas, formatPhoneInput, stripNonDigits } from "@/lib/format";
 
-const guaranteeTypes = ["계약 보증", "지급 보증", "하자 보수 보증", "창업 자금 보증", "임대차 보증"];
-const periods = ["6개월", "12개월", "24개월", "36개월"];
+const guaranteeTypes = ["대출금 지급 보증", "계약 보증", "하자 보수 보증", "창업 자금 보증", "임대차 보증"];
+const periods = ["1년", "2년", "5년", "10년"];
+const amountPresets = [
+  { label: "1천만원", value: "10000000" },
+  { label: "3천만원", value: "30000000" },
+  { label: "5천만원", value: "50000000" },
+  { label: "1억원", value: "100000000" },
+  { label: "직접입력", value: "custom" },
+];
 
 const inputCls =
   "mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor";
@@ -16,13 +23,36 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
   const [phone, setPhone] = useState("");
   const [business, setBusiness] = useState("");
   const [type, setType] = useState(guaranteeTypes[0]);
-  const [amount, setAmount] = useState("");
+  const [amountChoice, setAmountChoice] = useState(amountPresets[0].value);
+  const [customAmount, setCustomAmount] = useState("");
   const [period, setPeriod] = useState(periods[0]);
   const [result, setResult] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (e: FormEvent) => {
+  const finalAmount = amountChoice === "custom" ? stripNonDigits(customAmount) : amountChoice;
+
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setResult(generateGuaranteeNumber());
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, business, type, amount: Number(finalAmount), period }),
+      });
+      const json = (await res.json()) as { guaranteeNumber?: string; error?: string };
+      if (!res.ok || !json.guaranteeNumber) {
+        setError(json.error ?? "신청 처리 중 오류가 발생했습니다.");
+        return;
+      }
+      setResult(json.guaranteeNumber);
+    } catch {
+      setError("서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (result) {
@@ -44,7 +74,7 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
             </div>
             <div className="flex justify-between">
               <dt className="text-muted">보증 금액</dt>
-              <dd>{amount ? `${Number(amount).toLocaleString()}원` : "—"}</dd>
+              <dd>{finalAmount ? `${Number(finalAmount).toLocaleString()}원` : "—"}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted">보증 기간</dt>
@@ -52,8 +82,8 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
             </div>
           </dl>
           <p className="mt-4 text-[13px] text-muted">
-            위 보증번호로 진행 현황 조회에서 상태를 확인할 수 있습니다. 실제 심사·발급이 이루어지는
-            기능은 아닌 디자인 예시입니다.
+            위 보증번호로 진행 현황 조회에서 상태를 확인할 수 있습니다. 이름과 연락처로도 조회할 수
+            있으니 잊어버리지 않으셔도 됩니다.
           </p>
           <button
             type="button"
@@ -71,7 +101,7 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
     <Modal title="보증 신청" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-5">
         <p className="text-[13px] leading-5 text-muted">
-          입력하신 정보는 저장되지 않으며, 신청 결과 확인을 위한 데모 화면입니다.
+          입력하신 정보는 신청 접수와 진행 현황 조회를 위해서만 사용됩니다.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <label className={labelCls}>
@@ -89,7 +119,8 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
             <input
               required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+              inputMode="numeric"
               className={inputCls}
               placeholder="010-0000-0000"
             />
@@ -114,17 +145,18 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
         </label>
         <div className="grid grid-cols-2 gap-4">
           <label className={labelCls}>
-            보증 금액(원)
-            <input
-              required
-              type="number"
-              min={0}
-              step={1000000}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+            보증 금액
+            <select
+              value={amountChoice}
+              onChange={(e) => setAmountChoice(e.target.value)}
               className={inputCls}
-              placeholder="50000000"
-            />
+            >
+              {amountPresets.map((a) => (
+                <option key={a.value} value={a.value}>
+                  {a.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className={labelCls}>
             보증 기간
@@ -135,11 +167,26 @@ export default function ApplyModal({ onClose }: { onClose: () => void }) {
             </select>
           </label>
         </div>
+        {amountChoice === "custom" && (
+          <label className={`block ${labelCls}`}>
+            직접 입력 금액(원)
+            <input
+              required
+              value={customAmount}
+              onChange={(e) => setCustomAmount(formatDigitsWithCommas(e.target.value))}
+              inputMode="numeric"
+              className={inputCls}
+              placeholder="45,000,000"
+            />
+          </label>
+        )}
+        {error && <p className="text-[13px] text-red-600">{error}</p>}
         <button
           type="submit"
-          className="w-full rounded-md bg-ink py-3 text-[15px] font-medium text-white hover:bg-harbor"
+          disabled={submitting}
+          className="w-full rounded-md bg-ink py-3 text-[15px] font-medium text-white hover:bg-harbor disabled:opacity-60"
         >
-          신청하기
+          {submitting ? "처리 중…" : "신청하기"}
         </button>
       </form>
     </Modal>

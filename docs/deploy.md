@@ -29,6 +29,8 @@
    - Add new site → Import an existing project → GitHub → 리포지토리 선택
    - 빌드 설정은 `netlify.toml`에서 읽으므로 그대로 Deploy
    - 배포 후 `main`에 push할 때마다 자동 재배포된다.
+   - 보증 신청·관리자 페이지가 동작하려면 `docs/backend-setup.md`의 5단계(Netlify 환경 변수 설정)를
+     반드시 진행한다. 하지 않으면 배포는 되지만 신청·조회·관리자 화면에서 오류 메시지가 나온다.
 
 4. 주소 확정 후 환경 변수 (커스텀 도메인을 쓸 때만)
    - Site configuration → Environment variables → `NEXT_PUBLIC_SITE_URL` = `https://내도메인`

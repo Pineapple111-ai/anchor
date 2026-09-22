@@ -2,71 +2,144 @@
 
 import { useState, type FormEvent } from "react";
 import Modal from "./Modal";
-import { lookupStatus, statusSteps } from "@/lib/mock";
+import { formatGuaranteeNumberInput, formatPhoneInput } from "@/lib/format";
+import type { ApplicationSummary } from "@/lib/applications";
+
+type Mode = "number" | "identity";
 
 export default function StatusModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<Mode>("number");
   const [number, setNumber] = useState("");
-  const [result, setResult] = useState<ReturnType<typeof lookupStatus>>(undefined as never);
-  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [results, setResults] = useState<ApplicationSummary[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setResult(lookupStatus(number));
-    setSubmitted(true);
+    setError(null);
+    setLoading(true);
+    setResults(null);
+    try {
+      const params = new URLSearchParams();
+      if (mode === "number") {
+        params.set("number", number.trim());
+      } else {
+        params.set("name", name.trim());
+        params.set("phone", phone.trim());
+      }
+      const res = await fetch(`/api/applications/lookup?${params.toString()}`);
+      const json = (await res.json()) as { results?: ApplicationSummary[]; error?: string };
+      if (!res.ok) {
+        setError(json.error ?? "조회 중 오류가 발생했습니다.");
+        return;
+      }
+      setResults(json.results ?? []);
+    } catch {
+      setError("서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Modal title="진행 현황 조회" onClose={onClose}>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <label className="block text-[14px] font-medium text-ink">
-          보증번호
-          <input
-            required
-            value={number}
-            onChange={(e) => {
-              setNumber(e.target.value);
-              setSubmitted(false);
+      <div className="flex gap-1.5 rounded-lg bg-chalk p-1">
+        {(
+          [
+            ["number", "보증번호로 조회"],
+            ["identity", "이름·연락처로 조회"],
+          ] as const
+        ).map(([m, label]) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => {
+              setMode(m);
+              setResults(null);
+              setError(null);
             }}
-            placeholder="예: 2026-1234-5678"
-            className="mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor"
-          />
-        </label>
+            className={`flex-1 rounded-md py-2 text-[13px] font-medium transition-colors ${
+              mode === m ? "bg-white text-ink shadow-sm" : "text-muted"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={onSubmit} className="mt-4 space-y-4">
+        {mode === "number" ? (
+          <label className="block text-[14px] font-medium text-ink">
+            보증번호
+            <input
+              required
+              value={number}
+              onChange={(e) => setNumber(formatGuaranteeNumberInput(e.target.value))}
+              inputMode="numeric"
+              placeholder="2026-1234-5678"
+              className="mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor"
+            />
+          </label>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <label className="text-[14px] font-medium text-ink">
+              이름
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="홍길동"
+                className="mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor"
+              />
+            </label>
+            <label className="text-[14px] font-medium text-ink">
+              연락처
+              <input
+                required
+                value={phone}
+                onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+                inputMode="numeric"
+                placeholder="010-0000-0000"
+                className="mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor"
+              />
+            </label>
+          </div>
+        )}
         <button
           type="submit"
-          className="w-full rounded-md bg-ink py-3 text-[15px] font-medium text-white hover:bg-harbor"
+          disabled={loading}
+          className="w-full rounded-md bg-ink py-3 text-[15px] font-medium text-white hover:bg-harbor disabled:opacity-60"
         >
-          조회하기
+          {loading ? "조회 중…" : "조회하기"}
         </button>
       </form>
 
-      {submitted && (
+      {error && <p className="mt-4 text-[13px] text-red-600">{error}</p>}
+
+      {results && (
         <div className="mt-6 border-t border-line pt-6">
-          {result ? (
-            <>
-              <p className="text-[14px] text-muted">
-                보증번호 <span className="font-medium text-ink">{number.trim()}</span>의 현재 상태
-              </p>
-              <p className="mt-2 font-serif text-[24px] font-bold text-harbor">{result.step}</p>
-              <ol className="mt-5 space-y-2">
-                {statusSteps.map((step, i) => (
-                  <li key={step} className="flex items-center gap-3 text-[14px]">
-                    <span
-                      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[12px] font-bold ${
-                        i <= result.index ? "bg-harbor text-white" : "bg-mist text-muted"
-                      }`}
-                    >
-                      {i + 1}
-                    </span>
-                    <span className={i <= result.index ? "text-ink" : "text-muted"}>{step}</span>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-5 text-[13px] text-muted">
-                실제 심사 데이터가 아닌, 입력한 보증번호를 바탕으로 만든 데모 결과입니다.
-              </p>
-            </>
+          {results.length === 0 ? (
+            <p className="text-[14px] text-muted">일치하는 신청 내역을 찾을 수 없습니다.</p>
           ) : (
-            <p className="text-[14px] text-muted">보증번호를 입력해 주세요.</p>
+            <ul className="space-y-4">
+              {results.map((r) => (
+                <li key={r.guarantee_number} className="rounded-md border border-line p-4">
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-serif text-[18px] font-bold text-harbor">
+                      {r.guarantee_number}
+                    </span>
+                    <span className="text-[13px] text-muted">{r.type}</span>
+                  </div>
+                  <p className="mt-2 text-[15px] font-medium text-ink">{r.status}</p>
+                  <p className="mt-1 text-[13px] text-muted">
+                    {r.amount.toLocaleString()}원 · {r.period} · 신청일{" "}
+                    {new Date(r.created_at).toLocaleDateString("ko-KR")}
+                  </p>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}

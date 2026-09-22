@@ -9,7 +9,7 @@ const items: Item[] = [
   { icon: "apply", title: "보증 신청", desc: "온라인으로 신청서를 작성하고 제출합니다.", action: "apply" },
   { icon: "calc", title: "보증료 계산", desc: "보증 금액과 기간으로 예상 보증료를 확인합니다.", href: "#" },
   { icon: "status", title: "진행 현황 조회", desc: "접수한 보증의 심사 단계를 확인합니다.", action: "status" },
-  { icon: "docs", title: "필요 서류 안내", desc: "보증 유형별로 준비할 서류를 안내합니다.", href: "#" },
+  { icon: "docs", title: "필요 서류 안내", desc: "보증 유형별로 준비할 서류를 안내합니다.", action: "documents" },
   { icon: "book", title: "상담 예약", desc: "방문 또는 전화 상담 시간을 예약합니다.", action: "consult" },
   { icon: "branch", title: "지점 찾기", desc: "가까운 지점의 위치와 운영 시간을 봅니다.", href: "#" },
 ];

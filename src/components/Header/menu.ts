@@ -14,7 +14,7 @@ export const menuGroups: MenuGroup[] = [
     summary: "사업 단계에 맞는 보증을 찾아보세요.",
     items: [
       { label: "계약 보증", href: "#" },
-      { label: "지급 보증", href: "#" },
+      { label: "대출금 지급 보증", href: "#" },
       { label: "하자 보수 보증", href: "#" },
       { label: "창업 자금 보증", href: "#" },
       { label: "임대차 보증", href: "#" },

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
-export type ModalName = "apply" | "status" | "consult" | "eligibility" | null;
+export type ModalName = "apply" | "status" | "consult" | "eligibility" | "documents" | null;
 
 type ModalContextValue = {
   active: ModalName;

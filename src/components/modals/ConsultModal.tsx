@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Modal from "./Modal";
+import { formatPhoneInput } from "@/lib/format";
 
 const timeSlots = ["오전 (09:00–12:00)", "점심 이후 (13:00–15:00)", "오후 (15:00–18:00)"];
 
@@ -66,7 +67,8 @@ export default function ConsultModal({ onClose }: { onClose: () => void }) {
           <input
             required
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+            inputMode="numeric"
             className="mt-1.5 w-full rounded-md border border-line px-3.5 py-2.5 text-[15px] outline-none focus:border-harbor focus:ring-1 focus:ring-harbor"
             placeholder="010-0000-0000"
           />
