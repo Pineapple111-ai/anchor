@@ -7,20 +7,6 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
       id="mobile-menu"
       className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-white lg:hidden"
     >
-      <div className="flex gap-2 border-b border-line px-5 py-4">
-        <a
-          href="#"
-          className="flex-1 rounded-md bg-ink py-3 text-center text-[15px] font-medium text-white"
-        >
-          로그인
-        </a>
-        <a
-          href="#"
-          className="flex-1 rounded-md border border-ink py-3 text-center text-[15px] font-medium text-ink"
-        >
-          가입
-        </a>
-      </div>
       <ul>
         {menuGroups.map((g) => (
           <li key={g.id} className="border-b border-line">

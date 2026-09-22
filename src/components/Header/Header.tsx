@@ -45,25 +45,6 @@ export default function Header() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            aria-label="통합 검색"
-            className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-mist"
-          >
-            <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="m16 16 4.5 4.5" />
-            </svg>
-          </button>
-          <a href="#" className="hidden px-3 py-2 text-[15px] font-medium text-ink hover:text-harbor lg:block">
-            로그인
-          </a>
-          <a
-            href="#"
-            className="hidden rounded-md bg-ink px-4 py-2 text-[15px] font-medium text-white hover:bg-harbor lg:block"
-          >
-            가입
-          </a>
-          <button
-            type="button"
             aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"

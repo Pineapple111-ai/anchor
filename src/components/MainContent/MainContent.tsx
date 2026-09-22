@@ -29,12 +29,6 @@ export default function MainContent() {
               <dd>주말 및 공휴일</dd>
             </div>
           </dl>
-          <a
-            href="#"
-            className="mt-6 block rounded-md border border-ink py-3 text-center text-[15px] font-medium transition-colors hover:bg-ink hover:text-white"
-          >
-            자주 묻는 질문
-          </a>
         </aside>
       </div>
     </section>
