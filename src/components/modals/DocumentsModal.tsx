@@ -64,9 +64,6 @@ export default function DocumentsModal({ onClose }: { onClose: () => void }) {
         일부 서류가 자동으로 제출 처리될 수 있습니다. 이 경우 위 서류를 별도로 첨부하지 않아도
         됩니다.
       </p>
-      <p className="mt-3 text-[13px] text-muted">
-        실제 서류 자동 제출 기능이 동작하는 화면은 아닌 안내 문구입니다.
-      </p>
     </Modal>
   );
 }

@@ -34,9 +34,7 @@ export default function ConsultModal({ onClose }: { onClose: () => void }) {
               <dd>{time}</dd>
             </div>
           </dl>
-          <p className="mt-4 text-[13px] text-muted">
-            담당자가 순서대로 연락드립니다. 실제로 접수되는 예약은 아닌 디자인 예시입니다.
-          </p>
+          <p className="mt-4 text-[13px] text-muted">담당자가 순서대로 연락드립니다.</p>
           <button
             type="button"
             onClick={onClose}

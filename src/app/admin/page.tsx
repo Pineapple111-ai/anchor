@@ -1,9 +1,23 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { ADMIN_SELECTABLE_STATUSES, type Application, type ApplicationStatus } from "@/lib/applications";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  ADMIN_SELECTABLE_STATUSES,
+  CERTIFICATE_MAX_BYTES,
+  type Application,
+  type ApplicationStatus,
+} from "@/lib/applications";
 
 type LoadState = "checking" | "needs-login" | "ready";
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function AdminPage() {
   const [state, setState] = useState<LoadState>("checking");
@@ -12,6 +26,9 @@ export default function AdminPage() {
   const [apps, setApps] = useState<Application[]>([]);
   const [listError, setListError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [certBusyId, setCertBusyId] = useState<string | null>(null);
+  const [certError, setCertError] = useState<{ id: string; message: string } | null>(null);
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const loadList = async () => {
     const res = await fetch("/api/admin/applications");
@@ -72,10 +89,51 @@ export default function AdminPage() {
     setSavingId(null);
   };
 
+  const onCertificateSelected = async (id: string, e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setCertError(null);
+    if (file.size > CERTIFICATE_MAX_BYTES) {
+      setCertError({ id, message: "이미지 용량이 너무 큽니다. 3MB 이하로 올려주세요." });
+      return;
+    }
+    setCertBusyId(id);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const res = await fetch(`/api/admin/applications/${id}/certificate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl }),
+      });
+      const json = (await res.json()) as { application?: Application; error?: string };
+      if (!res.ok || !json.application) {
+        setCertError({ id, message: json.error ?? "업로드 중 오류가 발생했습니다." });
+        return;
+      }
+      setApps((prev) => prev.map((a) => (a.id === id ? json.application! : a)));
+    } catch {
+      setCertError({ id, message: "파일을 읽는 중 오류가 발생했습니다." });
+    } finally {
+      setCertBusyId(null);
+    }
+  };
+
+  const onCertificateRemove = async (id: string) => {
+    setCertBusyId(id);
+    setCertError(null);
+    const res = await fetch(`/api/admin/applications/${id}/certificate`, { method: "DELETE" });
+    if (res.ok) {
+      setApps((prev) => prev.map((a) => (a.id === id ? { ...a, certificate_data: null } : a)));
+    } else {
+      const json = (await res.json()) as { error?: string };
+      setCertError({ id, message: json.error ?? "삭제 중 오류가 발생했습니다." });
+    }
+    setCertBusyId(null);
+  };
+
   if (state === "checking") {
-    return (
-      <div className="grid min-h-screen place-items-center bg-chalk text-muted">확인 중…</div>
-    );
+    return <div className="grid min-h-screen place-items-center bg-chalk text-muted">확인 중…</div>;
   }
 
   if (state === "needs-login") {
@@ -112,7 +170,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-chalk px-4 py-10 lg:px-10">
-      <div className="mx-auto max-w-[1100px]">
+      <div className="mx-auto max-w-[1200px]">
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-[24px] font-bold text-ink">보증 신청 관리</h1>
           <button
@@ -129,7 +187,7 @@ export default function AdminPage() {
         )}
 
         <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-white">
-          <table className="w-full min-w-[820px] text-left text-[14px]">
+          <table className="w-full min-w-[980px] text-left text-[14px]">
             <thead className="border-b border-line bg-chalk text-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">접수일</th>
@@ -140,12 +198,13 @@ export default function AdminPage() {
                 <th className="px-4 py-3 font-medium">금액</th>
                 <th className="px-4 py-3 font-medium">기간</th>
                 <th className="px-4 py-3 font-medium">상태</th>
+                <th className="px-4 py-3 font-medium">보증서 이미지</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {apps.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
                     접수된 신청이 없습니다.
                   </td>
                 </tr>
@@ -175,6 +234,50 @@ export default function AdminPage() {
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      ref={(el) => {
+                        fileInputs.current[a.id] = el;
+                      }}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => onCertificateSelected(a.id, e)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={certBusyId === a.id}
+                        onClick={() => fileInputs.current[a.id]?.click()}
+                        className="rounded-md border border-line px-2.5 py-1.5 text-[13px] hover:border-harbor disabled:opacity-60"
+                      >
+                        {certBusyId === a.id ? "처리 중…" : a.certificate_data ? "교체" : "업로드"}
+                      </button>
+                      {a.certificate_data && (
+                        <>
+                          <a
+                            href={a.certificate_data}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[13px] text-harbor hover:underline"
+                          >
+                            보기
+                          </a>
+                          <button
+                            type="button"
+                            disabled={certBusyId === a.id}
+                            onClick={() => onCertificateRemove(a.id)}
+                            className="text-[13px] text-red-600 hover:underline disabled:opacity-60"
+                          >
+                            삭제
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {certError?.id === a.id && (
+                      <p className="mt-1 text-[12px] text-red-600">{certError.message}</p>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -44,9 +44,7 @@ export default function EligibilityModal({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
       </section>
-      <p className="mt-6 text-[13px] text-muted">
-        실제 심사 기준이 아닌 가상의 예시 수치입니다. 정확한 조건은 상담을 통해 확인하세요.
-      </p>
+      <p className="mt-6 text-[13px] text-muted">정확한 조건은 상담을 통해 확인하세요.</p>
       <button
         type="button"
         onClick={() => {

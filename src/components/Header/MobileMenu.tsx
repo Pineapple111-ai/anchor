@@ -1,46 +1,42 @@
-import { menuGroups } from "./menu";
+"use client";
+
+import { useModal } from "@/components/modals/ModalContext";
+
+const navLinks = [
+  { label: "자주 찾는 서비스", href: "#services" },
+  { label: "공지사항", href: "#notice" },
+];
 
 export default function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { open: openModal } = useModal();
   if (!open) return null;
   return (
     <div
       id="mobile-menu"
       className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-white lg:hidden"
     >
-      <ul>
-        {menuGroups.map((g) => (
-          <li key={g.id} className="border-b border-line">
-            <details className="group">
-              <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-serif text-[18px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                {g.label}
-                <svg
-                  viewBox="0 0 20 20"
-                  className="h-4 w-4 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <path d="m5 8 5 5 5-5" />
-                </svg>
-              </summary>
-              <ul className="bg-chalk px-5 pb-3">
-                {g.items.map((it) => (
-                  <li key={it.label}>
-                    <a
-                      href={it.href}
-                      onClick={onClose}
-                      className="block py-2.5 text-[15px] text-ink"
-                    >
-                      {it.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          </li>
+      <nav className="flex flex-col px-5 py-4">
+        {navLinks.map((l) => (
+          <a
+            key={l.href}
+            href={l.href}
+            onClick={onClose}
+            className="border-b border-line py-4 font-serif text-[18px] font-semibold text-ink"
+          >
+            {l.label}
+          </a>
         ))}
-      </ul>
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            openModal("apply");
+          }}
+          className="mt-6 rounded-md bg-ink py-3 text-center text-[15px] font-medium text-white"
+        >
+          보증 신청
+        </button>
+      </nav>
     </div>
   );
 }

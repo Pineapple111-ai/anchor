@@ -17,7 +17,7 @@ const items: Item[] = [
 export default function Shortcut() {
   const { open } = useModal();
   return (
-    <section aria-labelledby="shortcut-title" className="bg-chalk">
+    <section id="services" aria-labelledby="shortcut-title" className="bg-chalk scroll-mt-20">
       <div className="mx-auto max-w-[1280px] px-5 py-14 lg:px-8 lg:py-[72px]">
         <h2 id="shortcut-title" className="font-serif text-[26px] font-bold lg:text-[30px]">
           자주 찾는 서비스

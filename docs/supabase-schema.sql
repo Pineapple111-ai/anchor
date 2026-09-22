@@ -10,6 +10,7 @@ create table if not exists applications (
   amount bigint not null,
   period text not null,
   status text not null default '접수 완료',
+  certificate_data text,
   created_at timestamptz not null default now()
 );
 
@@ -19,3 +20,7 @@ create index if not exists applications_name_phone_idx on applications (name, ph
 -- 이 앱은 서버(Route Handler)에서 서비스 롤 키로만 접근하므로,
 -- 브라우저에서 이 테이블에 직접 접근할 방법이 없습니다.
 alter table applications enable row level security;
+
+-- 이미 테이블을 만드셨다면 위 create table은 무시되고, 아래 한 줄만 실행하면
+-- 기존 테이블에 보증서 이미지 컬럼이 추가됩니다.
+alter table applications add column if not exists certificate_data text;

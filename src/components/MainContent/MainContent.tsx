@@ -2,7 +2,7 @@ import NoticeTabs from "./NoticeTabs";
 
 export default function MainContent() {
   return (
-    <section aria-label="새 소식과 고객센터" className="border-t border-line bg-white">
+    <section id="notice" aria-label="새 소식과 고객센터" className="border-t border-line bg-white scroll-mt-20">
       <div className="mx-auto grid max-w-[1280px] gap-12 px-5 py-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16 lg:px-8 lg:py-[72px]">
         <NoticeTabs />
         <aside aria-labelledby="cs-title" className="self-start border-t-4 border-brass bg-chalk p-7">

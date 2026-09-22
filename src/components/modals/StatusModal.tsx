@@ -137,6 +137,24 @@ export default function StatusModal({ onClose }: { onClose: () => void }) {
                     {r.amount.toLocaleString()}원 · {r.period} · 신청일{" "}
                     {new Date(r.created_at).toLocaleDateString("ko-KR")}
                   </p>
+                  {r.status === "보증서 발급 완료" && (
+                    r.certificate_data ? (
+                      <a
+                        href={r.certificate_data}
+                        download={`${r.guarantee_number}-보증서.png`}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-ink px-3.5 py-2 text-[13px] font-medium text-white hover:bg-harbor"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" />
+                        </svg>
+                        보증서 다운로드
+                      </a>
+                    ) : (
+                      <p className="mt-3 text-[13px] text-muted">
+                        보증서 이미지가 곧 등록될 예정입니다. 잠시 후 다시 확인해 주세요.
+                      </p>
+                    )
+                  )}
                 </li>
               ))}
             </ul>

@@ -20,12 +20,13 @@ export type Application = {
   amount: number;
   period: string;
   status: ApplicationStatus;
+  certificate_data: string | null;
   created_at: string;
 };
 
 export type ApplicationSummary = Pick<
   Application,
-  "guarantee_number" | "type" | "amount" | "period" | "status" | "created_at"
+  "guarantee_number" | "type" | "amount" | "period" | "status" | "certificate_data" | "created_at"
 >;
 
 export function toSummary(app: Application): ApplicationSummary {
@@ -35,9 +36,13 @@ export function toSummary(app: Application): ApplicationSummary {
     amount: app.amount,
     period: app.period,
     status: app.status,
+    certificate_data: app.certificate_data,
     created_at: app.created_at,
   };
 }
+
+// 보증서 이미지 업로드 용량 제한 (base64 인코딩 전 원본 기준)
+export const CERTIFICATE_MAX_BYTES = 3 * 1024 * 1024;
 
 export function generateGuaranteeNumber(): string {
   const year = new Date().getFullYear();

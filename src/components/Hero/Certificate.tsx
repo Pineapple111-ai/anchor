@@ -60,9 +60,6 @@ export default function Certificate() {
           </div>
         </div>
       </div>
-      <figcaption className="mt-4 text-center text-[13px] text-white/60">
-        실제 발급되는 보증서가 아닌 디자인 예시입니다.
-      </figcaption>
     </figure>
   );
 }
